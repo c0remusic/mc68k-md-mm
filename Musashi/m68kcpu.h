@@ -736,8 +736,10 @@ extern jmp_buf m68ki_aerr_trap;
 #define EA_AX_IX_16()  EA_AX_IX_8()
 #define EA_AX_IX_32()  EA_AX_IX_8()
 
-#define EA_A7_PI_8()   ((REG_A[7]+=2)-2)
-#define EA_A7_PD_8()   (REG_A[7]-=2)
+/* A byte through (A7)+ or -(A7) moves the 68000's stack pointer by two, to keep it word aligned, but the
+   ColdFire's by one: GCC pushes a char argument with a byte push and subq #3 there (PUSH_ROUNDING, m68k.h) */
+#define EA_A7_PI_8()   (CPU_TYPE_IS_COLDFIRE(CPU_TYPE) ? (REG_A[7]++) : ((REG_A[7]+=2)-2))
+#define EA_A7_PD_8()   (CPU_TYPE_IS_COLDFIRE(CPU_TYPE) ? (--REG_A[7]) : (REG_A[7]-=2))
 
 #define EA_AW_8()      MAKE_INT_16(m68ki_read_imm_16(m68ki_cpu))      /* absolute word */
 #define EA_AW_16()     EA_AW_8()
